@@ -21,14 +21,23 @@ export default function ProductForm({ product, onSuccess }) {
 
         await mutate(
             async () => {
-                if (isNew) {
-                    // Create new record
-                    const { data } = await axiosInstance.post("/products", newProduct);
-                    return [...products, data]; // Append new product to cache
-                } else {
-                    // Update existing record
-                    await axiosInstance.put(`/products/${product.id}`, newProduct);
-                    return products.map((item) => (item.id === product.id ? newProduct : item)); // Update cache manually
+                try {
+                    if (isNew) {
+                        // Create new record
+                        const { data } = await axiosInstance.post("/products", newProduct);
+                        reset({ name: "", price: "", category: "" });
+                        // Take Action after Success
+                        return [...products, data]; // Append new product to cache
+                    } else {
+                        // Update existing record
+                        await axiosInstance.put(`/products/${product.id}`, newProduct);
+                        reset({ name: "", price: "", category: "" });
+                        // Take Action after Success
+                        return products.map((item) => (item.id === product.id ? newProduct : item)); // Update cache manually
+                    }
+                } catch (error) {
+                    // Take Action after error
+                    return products;
                 }
             },
             {
@@ -40,8 +49,6 @@ export default function ProductForm({ product, onSuccess }) {
                 revalidate: false, // Don't re-fetch from API
             }
         );
-
-        reset({ name: "", price: "", category: "" }); // Reset form after submission
         onSuccess(); // Close form after success
     };
 

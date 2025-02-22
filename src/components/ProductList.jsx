@@ -11,8 +11,12 @@ export default function ProductList({ onEdit }) {
         const filteredProducts = products.filter((item) => item.id !== id); // Optimistic update
         await mutate(
             async () => {
-                await axiosInstance.delete(`/products/${id}`);
-                return filteredProducts; // Return new list without deleted product
+                try {
+                    await axiosInstance.delete(`/products/${id}`);
+                    return filteredProducts; // Return new list without deleted product
+                } catch (error) {
+                    return products;
+                }
             },
             {
                 optimisticData: filteredProducts,
