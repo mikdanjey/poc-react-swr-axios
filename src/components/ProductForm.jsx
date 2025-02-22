@@ -12,14 +12,12 @@ export default function ProductForm({ product, onSuccess }) {
 
     // Reset form when editing an existing product
     useEffect(() => {
-        if (product) {
-            reset(product);
-        }
+        reset(product || { name: "", price: "", category: "" });
     }, [product, reset]);
 
     const onSubmit = async (formData) => {
         const isNew = !product;
-        const newProduct = { ...formData }; // Temporary ID for UI updates
+        const newProduct = { ...formData };
 
         await mutate(
             async () => {
@@ -30,7 +28,7 @@ export default function ProductForm({ product, onSuccess }) {
                 } else {
                     // Update existing record
                     await axiosInstance.put(`/products/${product.id}`, newProduct);
-                    return products.map((item) => (item.id === product.id ? newProduct : item)); // Replace updated product
+                    return products.map((item) => (item.id === product.id ? newProduct : item)); // Update cache manually
                 }
             },
             {
